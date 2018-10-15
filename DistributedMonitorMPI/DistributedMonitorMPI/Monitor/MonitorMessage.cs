@@ -11,6 +11,6 @@ namespace DistributedMonitorMPI.Monitor
     {
         public T InternalState { get; set; }
         public long EntryClock { get; set; }
-        public State State { get; set; }
+        public int SenderRank { get; set; }
     }
 }

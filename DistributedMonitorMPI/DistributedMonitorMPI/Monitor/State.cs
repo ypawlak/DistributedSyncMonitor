@@ -9,6 +9,7 @@ namespace DistributedMonitorMPI.Monitor
     {
         OUTSIDE,
         INSIDE,
-        WAITING
+        WAITING,
+        REQUESTING
     }
 }

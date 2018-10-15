@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MPI;
 using DistributedMonitorMPI.Monitor;
 using DistributedMonitorMPI.ProducerConsumer;
+using DistributedMonitorMPI.Communication;
 
 namespace DistributedMonitorMPI
 {
@@ -14,7 +15,18 @@ namespace DistributedMonitorMPI
 
         static void Main(string[] args)
         {
-            SerializationTest2(args);
+            BasicMonitorTest(args);
+        }
+
+        private static void BasicMonitorTest(string[] args)
+        {
+
+            using (new MPI.Environment(ref args))
+            {
+                Intracommunicator comm = Communicator.world;
+                TestMonitor monitor = new TestMonitor(new MpiBroker(comm));
+                monitor.SetRank();
+            }
         }
 
         private static void SerializationTest(string[] args)
@@ -56,7 +68,6 @@ namespace DistributedMonitorMPI
                             Empty = new ConditionalVar() { WaitingQueue = new List<int>() { 2 } }
                         },
                         EntryClock = 0,
-                        State = State.INSIDE
                     };
 
                     
@@ -66,7 +77,7 @@ namespace DistributedMonitorMPI
                 else
                 {
                     MonitorMessage<ProdConsInternals> msg = comm.Receive<MonitorMessage<ProdConsInternals>>(Communicator.anySource, Communicator.anyTag);
-                    Console.WriteLine(string.Format("#{0} received message [{1}]", comm.Rank, msg.State));
+                    Console.WriteLine(string.Format("#{0} received message [{1}]", comm.Rank, msg.InternalState.Full.WaitingQueue.First()));
                 }
             }
         }
