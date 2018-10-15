@@ -5,10 +5,9 @@ using System.Text;
 
 namespace DistributedMonitorMPI.Monitor
 {
-    public enum State
+    [Serializable]
+    public class ConditionalVar
     {
-        OUTSIDE,
-        INSIDE,
-        WAITING
+        public IList<int> WaitingQueue { get; set; }
     }
 }

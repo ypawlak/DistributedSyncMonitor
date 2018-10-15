@@ -54,11 +54,13 @@
     <Compile Include="Communication\CommunicationBroker.cs" />
     <Compile Include="Communication\MpiBroker.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="Monitor\Consts.cs" />
     <Compile Include="Monitor\Monitor.cs" />
-    <Compile Include="Monitor\ConditionVar.cs" />
-    <Compile Include="Monitor\MonitorDTO.cs" />
+    <Compile Include="Monitor\ConditionalVar.cs" />
     <Compile Include="Monitor\MonitorMessage.cs" />
     <Compile Include="Monitor\State.cs" />
+    <Compile Include="ProducerConsumer\ProdConsInternals.cs" />
+    <Compile Include="ProducerConsumer\ProdCons.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -66,8 +68,6 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ProducerConsumer\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

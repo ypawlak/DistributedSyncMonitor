@@ -5,9 +5,8 @@ using System.Text;
 
 namespace DistributedMonitorMPI.Monitor
 {
-    [Serializable]
-    public class ConditionVar
+    class Consts
     {
-        public IList<int> WaitingQueue { get; set; }
+        public const int REQ_TAG = 10;
     }
 }

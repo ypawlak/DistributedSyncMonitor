@@ -8,11 +8,12 @@ using DistributedMonitorMPI.Communication;
 namespace DistributedMonitorMPI.Monitor
 {
     /// <summary>
-    /// Synchronization monitor using MPI Intracommunicator (distributed environment)
+    /// Monitor synchoronization mechanism for distributed environment
     /// </summary>
-    public abstract class Monitor
+    public abstract class Monitor<T>
     {
         private MpiBroker _communicator;
+
         private State _currentState;
         private long _syncEntryNumber { get; set; }
         public Monitor(MpiBroker communicator)
@@ -22,11 +23,18 @@ namespace DistributedMonitorMPI.Monitor
             _syncEntryNumber = 0;
         }
 
-        public abstract MonitorDTO ToDTO();
-        public abstract void UpdateWith(MonitorDTO dto);
+        protected T Internals { get; set; }
         public void Enter()
-        {
-            MonitorDTO current = ToDTO();
+        { 
+            var req = new MonitorMessage<T>()
+            {
+                InternalState = Internals,
+                EntryClock = _syncEntryNumber,
+                State = _currentState
+            };
+
+            _communicator.Broadcast(req, Consts.REQ_TAG);
+            //wait for all
 
         }
 
@@ -34,6 +42,16 @@ namespace DistributedMonitorMPI.Monitor
         {
 
         }
+
+        public void ListenerJob()
+        {
+            while(_communicator.ProbeMessage())
+            {
+
+            }
+        }
+
+        private 
 
         //public MonitorDTO Signal(ConditionVar condVar)
         //{

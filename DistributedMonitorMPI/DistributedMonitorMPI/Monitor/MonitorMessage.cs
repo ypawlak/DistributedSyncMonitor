@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace DistributedMonitorMPI.Monitor
 {
     [Serializable]
-    public class MonitorMessage
+    public class MonitorMessage<T>
     {
-        public MonitorDTO InternalState { get; set; }
+        public T InternalState { get; set; }
         public long EntryClock { get; set; }
-        public long State { get; set; }
+        public State State { get; set; }
     }
 }
