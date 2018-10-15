@@ -55,6 +55,7 @@
     <Compile Include="Communication\MpiBroker.cs" />
     <Compile Include="Communication\Logger.cs" />
     <Compile Include="Monitor\Consts.cs" />
+    <Compile Include="Monitor\Logger.cs" />
     <Compile Include="Monitor\Monitor.cs" />
     <Compile Include="Monitor\ConditionalVar.cs" />
     <Compile Include="Monitor\MonitorMessage.cs" />

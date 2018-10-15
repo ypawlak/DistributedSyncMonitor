@@ -15,8 +15,8 @@ namespace DistributedMonitorMPI.ProducerConsumer
             {
                 Count = 0,
                 N = bufferSize,
-                Full = new ConditionalVar() { WaitingQueue = new List<int>() },
-                Empty = new ConditionalVar() { WaitingQueue = new List<int>() }
+                Full = new ConditionalVar() { WaitingQueue = new List<int>(), Name = "Full" },
+                Empty = new ConditionalVar() { WaitingQueue = new List<int>(), Name = "Empty" }
             };
         }
     }

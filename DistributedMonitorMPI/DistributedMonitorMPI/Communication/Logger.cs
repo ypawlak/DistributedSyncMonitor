@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DistributedMonitorMPI.Communication
 {
-    class Logger
+    static class Logger
     {
         public static void LogSent(int fromRank, int toRank, int tag)
         {

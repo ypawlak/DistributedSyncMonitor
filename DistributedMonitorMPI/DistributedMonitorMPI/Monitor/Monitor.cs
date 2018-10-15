@@ -26,6 +26,22 @@ namespace DistributedMonitorMPI.Monitor
             _syncEntryNumber = 0;
         }
 
+        public void CommunicationRoutine(int millisTimeout)
+        {
+            if (_currentState == State.OUTSIDE || _currentState == State.WAITING)
+            {
+                int startTime = DateTime.Now.Millisecond;
+                int elapsedTime = DateTime.Now.Millisecond - startTime;
+
+                while (Communicator.ProbeMessage(Consts.REQ_TAG) && elapsedTime < millisTimeout)
+                {
+                    MonitorMessage<T> received = Communicator.ReceiveMessage<MonitorMessage<T>>(Consts.REQ_TAG);
+                    ReplyAck(received);
+                    elapsedTime = DateTime.Now.Millisecond - startTime;
+                }
+            }
+        }
+
         protected MpiBroker Communicator { get; set; }
         protected T Internals { get; set; }
         protected void Enter()
@@ -43,15 +59,23 @@ namespace DistributedMonitorMPI.Monitor
             Requesting();
             
             _syncEntryNumber++;
-            Console.WriteLine(string.Format("#{0} made {1} entry to CS", Communicator.MyRank, _syncEntryNumber));
+            Logger.LogCSEntry(Communicator.MyRank, _syncEntryNumber);
         }
 
         protected void Exit()
         {
-            foreach(var message in _deferredMessages)
-                ReplyAck(message);
-            _deferredMessages.Clear();
-            Console.WriteLine(string.Format("#{0} finished {1} entry to CS", Communicator.MyRank, _syncEntryNumber));
+            SendDeferredMessages();
+            Logger.LogCSExit(Communicator.MyRank, _syncEntryNumber);
+        }
+
+        protected void Wait(ConditionalVar condVar)
+        {
+            condVar.WaitingQueue.Add(Communicator.MyRank);
+            SendDeferredMessages();
+        }
+        protected void Signal(ConditionalVar condVar)
+        {
+
         }
 
         private void Requesting()
@@ -124,14 +148,13 @@ namespace DistributedMonitorMPI.Monitor
             Communicator.Send(reply, msg.SenderRank, Consts.ACK_TAG);
         }
 
-        //public void Signal(ConditionVar condVar)
-        //{
+        private void SendDeferredMessages()
+        {
+            foreach (var message in _deferredMessages)
+                ReplyAck(message);
+            _deferredMessages.Clear();
+        }
 
-        //}
-
-        //public void Wait(ConditionVar condVar)
-        //{
-
-        //}
+        
     }
 }
