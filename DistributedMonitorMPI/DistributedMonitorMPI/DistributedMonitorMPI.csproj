@@ -51,17 +51,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Communication\CommunicationBroker.cs" />
-    <Compile Include="Communication\MpiBroker.cs" />
+    <Compile Include="Communication\ICommunicationHandler.cs" />
+    <Compile Include="Communication\MpiHandler.cs" />
     <Compile Include="Communication\Logger.cs" />
-    <Compile Include="Monitor\Consts.cs" />
+    <Compile Include="Monitor\Tags.cs" />
     <Compile Include="Monitor\Logger.cs" />
     <Compile Include="Monitor\Monitor.cs" />
     <Compile Include="Monitor\ConditionalVar.cs" />
     <Compile Include="Monitor\MonitorMessage.cs" />
     <Compile Include="Monitor\State.cs" />
+    <Compile Include="ProducerConsumer\IntegersConsumer.cs" />
     <Compile Include="ProducerConsumer\ProdConsInternals.cs" />
-    <Compile Include="ProducerConsumer\ProdCons.cs" />
+    <Compile Include="ProducerConsumer\ProdConsSyncBuffer.cs" />
+    <Compile Include="ProducerConsumer\IntegersProducer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestMonitor.cs" />

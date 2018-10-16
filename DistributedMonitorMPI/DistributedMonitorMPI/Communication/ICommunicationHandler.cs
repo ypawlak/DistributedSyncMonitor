@@ -5,7 +5,7 @@ using System.Text;
 
 namespace DistributedMonitorMPI.Communication
 {
-    class CommunicationBroker
+    public interface ICommunicationHandler
     {
     }
 }

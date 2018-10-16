@@ -8,7 +8,7 @@ namespace DistributedMonitorMPI
 {
     class TestMonitor : Monitor.Monitor<long>
     {
-        public TestMonitor(MpiBroker communicator) : base(communicator)
+        public TestMonitor(MpiHandler communicator) : base(communicator)
         {
             Internals = 0;
         }

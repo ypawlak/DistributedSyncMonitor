@@ -8,11 +8,11 @@ using System.Text;
 
 namespace DistributedMonitorMPI.Communication
 {
-    public class MpiBroker
+    public class MpiHandler
     {
         private Intracommunicator _comm;
 
-        public MpiBroker(Intracommunicator comm)
+        public MpiHandler(Intracommunicator comm)
         {
             _comm = comm;
         }

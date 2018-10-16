@@ -15,7 +15,32 @@ namespace DistributedMonitorMPI
 
         static void Main(string[] args)
         {
-            BasicMonitorTest(args);
+            //SerializationTest(args);
+            //SerializationTest2(args);
+            //BasicMonitorTest(args);
+            ProducerConsumer(args);
+        }
+
+        private static void ProducerConsumer(string[] args)
+        {
+            using (new MPI.Environment(ref args))
+            {
+                Intracommunicator comm = Communicator.world;
+                ProdConsSyncBuffer<int> monitor = new ProdConsSyncBuffer<int>(new MpiHandler(comm), 100);
+                var prod = new IntegersProducer(comm.Rank, monitor);
+                comm.Barrier();
+                
+                if (comm.Rank % 2 == 0)
+                {
+                    prod.Produce(10);
+                }
+                else
+                {
+                    var cons = new IntegersConsumer(comm.Rank, monitor);
+                    cons.Consume(10);
+                }
+                comm.Barrier();
+            }
         }
 
         private static void BasicMonitorTest(string[] args)
@@ -24,7 +49,7 @@ namespace DistributedMonitorMPI
             using (new MPI.Environment(ref args))
             {
                 Intracommunicator comm = Communicator.world;
-                TestMonitor monitor = new TestMonitor(new MpiBroker(comm));
+                TestMonitor monitor = new TestMonitor(new MpiHandler(comm));
                 monitor.SetRank();
             }
         }
@@ -58,11 +83,10 @@ namespace DistributedMonitorMPI
                 Intracommunicator comm = Communicator.world;
                 if (comm.Rank == 0)
                 {
-                    var test = new MonitorMessage<ProdConsInternals>()
+                    var test = new MonitorMessage<ProdConsInternals<int>>()
                     {
-                        InternalState = new ProdConsInternals()
+                        InternalState = new ProdConsInternals<int>()
                         {
-                            Count = 0,
                             N = 100,
                             Full = new ConditionalVar() { WaitingQueue = new List<int>() { 1 } },
                             Empty = new ConditionalVar() { WaitingQueue = new List<int>() { 2 } }
@@ -76,8 +100,10 @@ namespace DistributedMonitorMPI
                 }
                 else
                 {
-                    MonitorMessage<ProdConsInternals> msg = comm.Receive<MonitorMessage<ProdConsInternals>>(Communicator.anySource, Communicator.anyTag);
-                    Console.WriteLine(string.Format("#{0} received message [{1}]", comm.Rank, msg.InternalState.Full.WaitingQueue.First()));
+                    MonitorMessage<ProdConsInternals<int>> msg = comm.Receive<MonitorMessage<ProdConsInternals<int>>>
+                        (Communicator.anySource, Communicator.anyTag);
+                    Console.WriteLine(string.Format("#{0} received message [{1}]",
+                        comm.Rank, msg.InternalState.Full.WaitingQueue.First()));
                 }
             }
         }

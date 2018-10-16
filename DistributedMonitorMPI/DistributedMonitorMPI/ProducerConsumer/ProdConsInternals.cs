@@ -8,11 +8,11 @@ namespace DistributedMonitorMPI.ProducerConsumer
 {
 
     [Serializable]
-    public class ProdConsInternals
+    public class ProdConsInternals<T>
     {
         public ConditionalVar Full { get; set; }
         public ConditionalVar Empty { get; set; }
-        public long Count { get; set; }
-        public long N { get; set; }
+        public int N { get; set; }
+        public IList<T> Buffer { get; set; }
     }
 }
