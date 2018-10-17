@@ -18,25 +18,26 @@ namespace DistributedMonitorMPI.ProducerConsumer
         }
         public void Consume(long valuesCount)
         {
+            var rand = new Random(_rank);
             int consumedCount = 0;
             while (valuesCount > consumedCount)
             {
                 //Communicating
-                Console.WriteLine(string.Format($"Consumer #{_rank} begun communication"));
-                _buffer.Communicate( new Random().Next(200, 100000));
+               // Console.WriteLine(string.Format($"Consumer #{_rank} begun communication"));
+                _buffer.Communicate(rand.Next(200, 100000));
                 
-                Console.WriteLine(string.Format($"Consumer #{_rank} begun obtaining value from buffer"));
+                //Console.WriteLine(string.Format($"Consumer #{_rank} begun obtaining value from buffer"));
                 int consumedVal = _buffer.Get();
-                Console.WriteLine(string.Format($"Consumer #{_rank} obtained value [{consumedVal}]"));
+                //Console.WriteLine(string.Format($"Consumer #{_rank} obtained value [{consumedVal}]"));
                 
                 //Consuming
-                //Thread.Sleep(new Random().Next(200, 1000));
+                Thread.Sleep(rand.Next(200, 1000));
                 consumedCount++;
                 //Console.WriteLine(string.Format($"Consumer #{_rank} consumed value [{consumedVal}]"));
             }
 
             //Console.WriteLine(string.Format($"Consumer #{_rank} begun POST WORK communication"));
-            _buffer.Communicate(1000000);
+            _buffer.Communicate(50000000);
             Console.WriteLine(string.Format($"Consumer #{_rank} finished POST WORK communication"));
         }
     }

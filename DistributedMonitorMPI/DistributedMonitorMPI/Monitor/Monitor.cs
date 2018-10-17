@@ -56,25 +56,25 @@ namespace DistributedMonitorMPI.Monitor
         protected void Enter()
         {
             var req = BuildCurrentMonitorMessage();
-            Communicator.Broadcast(req, Tags.REQ_TAG);
+            long sentClock = Communicator.Broadcast(req, Tags.REQ_TAG);
 
-            Requesting();
+            Requesting(sentClock);
             
             _syncEntryNumber++;
-            Logger.LogCSEntry(Communicator.MyRank, _syncEntryNumber);
+            Logger.LogCSEntry(Communicator.MyRank, _syncEntryNumber, Communicator.Clock);
         }
 
         protected void Exit()
         {
-            SendDeferredMessages();
-            Logger.LogCSExit(Communicator.MyRank, _syncEntryNumber);
+            Logger.LogCSExit(Communicator.MyRank, _syncEntryNumber, Communicator.Clock);
+            AckDeferredMessages();
         }
 
         protected void Wait(ConditionalVar condVar)
         {
-            Logger.LogWait(Communicator.MyRank, _syncEntryNumber);
+            Logger.LogWait(Communicator.MyRank, _syncEntryNumber, Communicator.Clock);
             condVar.WaitingQueue.Add(Communicator.MyRank);
-            SendDeferredMessages();
+            AckDeferredMessages();
             Waiting();
             //add 1, it has to count as new entry
             _syncEntryNumber++;
@@ -86,18 +86,18 @@ namespace DistributedMonitorMPI.Monitor
                 int destinationProc = condVar.WaitingQueue[0];
                 condVar.WaitingQueue.RemoveAt(0);
                 var msg = BuildCurrentMonitorMessage();
-                Logger.LogPreSignal(Communicator.MyRank, destinationProc, _syncEntryNumber);
+                Logger.LogPreSignal(Communicator.MyRank, destinationProc, _syncEntryNumber, Communicator.Clock);
                 Communicator.Send(msg, destinationProc, Tags.WAKE_TAG);
                 Communicator.Broadcast(msg, Tags.PRIORITY_REQ_TAG);
                 PriorityRequesting();
                 
                 //add 1, it has to count as new entry
                 _syncEntryNumber++;
-                Logger.LogAfterSignalInCS(Communicator.MyRank, _syncEntryNumber);
+                Logger.LogAfterSignalInCS(Communicator.MyRank, _syncEntryNumber, Communicator.Clock);
             }
         }
 
-        private void Requesting()
+        private void Requesting(long sentRequestClock)
         {
             int receivedAcks = 0;
             T updatedInternals = Internals;
@@ -110,11 +110,11 @@ namespace DistributedMonitorMPI.Monitor
                     MonitorMessage<T> received = Communicator
                         .ReceiveMessage<MonitorMessage<T>>(Tags.ACK_TAG);
                     
-                    if (received.EntryClock > updatedSyncEntryNum)
+                    if (received.LastCsEntrySyncNumber > updatedSyncEntryNum)
                     {
                         //synchronizing current internal state to fresher critical section output
                         updatedInternals = received.InternalState;
-                        updatedSyncEntryNum = received.EntryClock;
+                        updatedSyncEntryNum = received.LastCsEntrySyncNumber;
                     }
                     receivedAcks++;
                 }
@@ -131,21 +131,26 @@ namespace DistributedMonitorMPI.Monitor
                     MonitorMessage<T> received = Communicator
                         .ReceiveMessage<MonitorMessage<T>>(Tags.REQ_TAG);
 
-                    if (received.EntryClock > _syncEntryNumber ||
-                        received.EntryClock == _syncEntryNumber && received.SenderRank > Communicator.MyRank)
-                    {
-                        _deferredMessages.Add(received);
-                    }
-                    else
+                    if (IsPriorREQ(received, sentRequestClock))
                     {
                         ReplyAck(received);
                     }
+                    else
+                    {
+                        _deferredMessages.Add(received);
+                    }
                 }
-                Logger.LogRequestingWithReceivedAcks(Communicator.MyRank, receivedAcks);
+                Logger.LogRequestingWithReceivedAcks(Communicator.MyRank, receivedAcks, Communicator.Clock);
             }
 
             _syncEntryNumber = updatedSyncEntryNum;
             Internals = updatedInternals;
+        }
+
+        private bool IsPriorREQ(MonitorMessage<T> requestMsg, long comparedClockVal)
+        {
+            return requestMsg.Clock < comparedClockVal || requestMsg.Clock == comparedClockVal
+                        && requestMsg.SenderRank < Communicator.MyRank;
         }
 
         private void Waiting()
@@ -168,7 +173,7 @@ namespace DistributedMonitorMPI.Monitor
 
             MonitorMessage<T> awakeningMsg = Communicator.ReceiveMessage<MonitorMessage<T>>(Tags.WAKE_TAG);
             
-            _syncEntryNumber = awakeningMsg.EntryClock;
+            _syncEntryNumber = awakeningMsg.LastCsEntrySyncNumber;
             Internals = awakeningMsg.InternalState;
         }
 
@@ -185,11 +190,11 @@ namespace DistributedMonitorMPI.Monitor
                     MonitorMessage<T> received = Communicator
                         .ReceiveMessage<MonitorMessage<T>>(Tags.ACK_TAG);
 
-                    if (received.EntryClock > updatedSyncEntryNum)
+                    if (received.LastCsEntrySyncNumber > updatedSyncEntryNum)
                     {
                         //synchronizing current internal state to fresher critical section output
                         updatedInternals = received.InternalState;
-                        updatedSyncEntryNum = received.EntryClock;
+                        updatedSyncEntryNum = received.LastCsEntrySyncNumber;
                     }
                     receivedAcks++;
                 }
@@ -205,7 +210,7 @@ namespace DistributedMonitorMPI.Monitor
                 {
                     MonitorMessage<T> received = Communicator
                         .ReceiveMessage<MonitorMessage<T>>(Tags.PRIORITY_REQ_TAG);
-                    if (received.EntryClock > _syncEntryNumber)
+                    if (received.LastCsEntrySyncNumber > _syncEntryNumber)
                         ReplyAck(received);
                     else
                         _deferredMessages.Add(received);
@@ -222,7 +227,7 @@ namespace DistributedMonitorMPI.Monitor
             Communicator.Send(reply, msg.SenderRank, Tags.ACK_TAG);
         }
 
-        private void SendDeferredMessages()
+        private void AckDeferredMessages()
         {
             foreach (var message in _deferredMessages)
                 ReplyAck(message);
@@ -234,7 +239,7 @@ namespace DistributedMonitorMPI.Monitor
             return new MonitorMessage<T>()
             {
                 InternalState = Internals,
-                EntryClock = _syncEntryNumber,
+                LastCsEntrySyncNumber = _syncEntryNumber,
                 SenderRank = Communicator.MyRank
             };
         }

@@ -19,24 +19,25 @@ namespace DistributedMonitorMPI.ProducerConsumer
         }
         public void Produce(long valuesCount)
         {
+            Random rand = new Random(_rank);
             int producedCount = 0;
             while (valuesCount > producedCount)
             {
                 //Communicating
-                Console.WriteLine(string.Format($"Producer #{_rank} begun communication"));
-                _buffer.Communicate(new Random().Next(200, 100000));
+                //Console.WriteLine(string.Format($"Producer #{_rank} begun communication"));
+                _buffer.Communicate(rand.Next(200, 100000));
                 //Producing
                 //Console.WriteLine(string.Format($"Producer #{_rank} begun producing"));
-                //Thread.Sleep(new Random().Next(200, 1000));
-                int newVal = producedCount;// new Random().Next();
-                Console.WriteLine(string.Format($"Producer #{_rank} produced new value [{newVal}]"));
+                Thread.Sleep(rand.Next(200, 1000));
+                int newVal = rand.Next();
+                //Console.WriteLine(string.Format($"Producer #{_rank} produced new value [{newVal}]"));
                 _buffer.Put(newVal);
                 producedCount++;
-                Console.WriteLine(string.Format($"Producer #{_rank} put new value [{newVal}] in buffer"));
+                //Console.WriteLine(string.Format($"Producer #{_rank} put new value [{newVal}] in buffer"));
             }
 
             Console.WriteLine(string.Format($"Producer #{_rank} begun POST WORK communication"));
-            _buffer.Communicate(1000000);
+            _buffer.Communicate(50000000);
             Console.WriteLine(string.Format($"Producer #{_rank} finished POST WORK communication"));
         }
     }

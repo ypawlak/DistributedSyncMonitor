@@ -7,40 +7,39 @@ namespace DistributedMonitorMPI.Monitor
 {
     static class Logger
     {
-        public static void LogCSEntry(int procRank, long entryNo)
+        public static void LogCSEntry(int procRank, long entryNo, long clock)
         {
-            Console.WriteLine(string.Format("#{0} made {1} entry to CS", procRank, entryNo));
+            Console.WriteLine($"{clock}#{procRank} made {entryNo} entry to CS");
         }
 
-        public static void LogCSExit(int procRank, long entryNo)
+        public static void LogCSExit(int procRank, long entryNo, long clock)
         {
-            Console.WriteLine(string.Format("#{0} finished {1} entry to CS", procRank, entryNo));
+            Console.WriteLine($"{clock}#{procRank} finished {entryNo} entry to CS");
         }
 
-        public static void LogCSWait(int procRank, long entryNo, string varName)
+        public static void LogCSWait(int procRank, long entryNo, string varName, long clock)
         {
-            Console.WriteLine(string.Format("#{0} finished {1} entry to CS and begun waiting in queue of conditional variable {2} entry to CS",
-                procRank, entryNo, varName));
+            Console.WriteLine($"{clock}#{procRank} finished {entryNo} entry to CS and begun waiting in queue of conditional variable {varName} entry to CS");
         }
 
-        public static void LogRequestingWithReceivedAcks(int rank, int receivedAcks)
+        public static void LogRequestingWithReceivedAcks(int rank, int receivedAcks, long clock)
         {
-            Console.WriteLine($"#{rank} requesting, obtained: {receivedAcks} acks");
+            //Console.WriteLine($"{clock}#{rank} requesting, obtained: {receivedAcks} acks");
         }
 
-        public static void LogWait(int rank, long entryNo)
+        public static void LogWait(int rank, long entryNo, long clock)
         {
-            Console.WriteLine($"#{rank} called Wait and finished {entryNo} entry to CS");
+            Console.WriteLine($"{clock}#{rank} called Wait and finished {entryNo} entry to CS");
         }
 
-        public static void LogPreSignal(int rank, int awProcess, long entryNo)
+        public static void LogPreSignal(int rank, int awProcess, long entryNo, long clock)
         {
-            Console.WriteLine($"#{rank} called Signal for awakening process {awProcess} in {entryNo} entry to CS");
+            Console.WriteLine($"{clock}#{rank} called Signal for awakening process {awProcess} in {entryNo} entry to CS");
         }
 
-        public static void LogAfterSignalInCS(int rank, long entryNo)
+        public static void LogAfterSignalInCS(int rank, long entryNo, long clock)
         {
-            Console.WriteLine($"#{rank} made {entryNo} entry to CS after Signal ");
+            Console.WriteLine($"{clock}#{rank} made {entryNo} entry to CS after Signal ");
         }
     }
 }

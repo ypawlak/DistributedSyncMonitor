@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Communication\ICommunicationHandler.cs" />
+    <Compile Include="Communication\IMessage.cs" />
     <Compile Include="Communication\MpiHandler.cs" />
     <Compile Include="Communication\Logger.cs" />
     <Compile Include="Monitor\Tags.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="Monitor\MonitorMessage.cs" />
     <Compile Include="Monitor\State.cs" />
     <Compile Include="ProducerConsumer\IntegersConsumer.cs" />
+    <Compile Include="ProducerConsumer\Logger.cs" />
     <Compile Include="ProducerConsumer\ProdConsInternals.cs" />
     <Compile Include="ProducerConsumer\ProdConsSyncBuffer.cs" />
     <Compile Include="ProducerConsumer\IntegersProducer.cs" />

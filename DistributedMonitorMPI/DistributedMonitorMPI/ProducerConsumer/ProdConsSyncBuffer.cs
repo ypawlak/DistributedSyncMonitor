@@ -27,6 +27,7 @@ namespace DistributedMonitorMPI.ProducerConsumer
             if (Internals.Buffer.Count == Internals.N)
                 Wait(Internals.Full);
             Internals.Buffer.Add(item);
+            Logger.LogProducedVal(Communicator.Clock, Communicator.MyRank, item.ToString(), Internals.Buffer.Count - 1);
             Signal(Internals.Empty);
 
             Exit();
@@ -40,6 +41,7 @@ namespace DistributedMonitorMPI.ProducerConsumer
                 Wait(Internals.Empty);
             T result = Internals.Buffer.Last();
             Internals.Buffer.RemoveAt(Internals.Buffer.Count - 1);
+            Logger.LogConsumedVal(Communicator.Clock, Communicator.MyRank, result.ToString(), Internals.Buffer.Count);
             Signal(Internals.Full);
 
             Exit();

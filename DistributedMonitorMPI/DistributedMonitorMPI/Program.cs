@@ -91,7 +91,7 @@ namespace DistributedMonitorMPI
                             Full = new ConditionalVar() { WaitingQueue = new List<int>() { 1 } },
                             Empty = new ConditionalVar() { WaitingQueue = new List<int>() { 2 } }
                         },
-                        EntryClock = 0,
+                        LastCsEntrySyncNumber = 0,
                     };
 
                     

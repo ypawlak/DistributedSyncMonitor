@@ -8,14 +8,14 @@ namespace DistributedMonitorMPI.Communication
 {
     static class Logger
     {
-        public static void LogSent(int fromRank, int toRank, int tag)
+        public static void LogSent(int fromRank, int toRank, int tag, long clock)
         {
-            Console.WriteLine(string.Format("#{0} SENT {1} TO {2}", fromRank, Tags.TagsDict[tag], toRank));
+            Console.WriteLine($"{clock}#{fromRank} SENT {Tags.TagsDict[tag]} TO {toRank}");
         }
 
-        public static void LogReceived(int receiverRank, int senderRank, int tag)
+        public static void LogReceived(int receiverRank, int senderRank, int tag, long clock)
         {
-            Console.WriteLine(string.Format("#{0} RECEIVED {1} FROM {2}", receiverRank, Tags.TagsDict[tag], senderRank));
+            Console.WriteLine($"{clock}#{receiverRank} RECEIVED {Tags.TagsDict[tag]} FROM {senderRank}");
         }
     }
 }

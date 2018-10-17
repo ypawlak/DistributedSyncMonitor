@@ -15,24 +15,41 @@ namespace DistributedMonitorMPI.Communication
         public MpiHandler(Intracommunicator comm)
         {
             _comm = comm;
+            Clock = 0;
         }
+
+        public long Clock { get; private set; }
 
         public int MyRank => _comm.Rank;
         public int ProcessesCount => _comm.Size;
         public IEnumerable<int> AllButMe => Enumerable.Range(0, _comm.Size).Except(new List<int> { _comm.Rank });
         
 
-        public void Send<T> (T message, int to, int tag)
+        public long Send<T> (T message, int to, int tag) where T : IMessage
         {
+            Clock++;
+            message.Clock = Clock;
             Request sent =_comm.ImmediateSend(message, to, tag);
             sent.Test();
-            Logger.LogSent(MyRank, to, tag);
+            Logger.LogSent(MyRank, to, tag, Clock);
+            return Clock;
         }
 
-        public void Broadcast<T> (T message, int tag)
+        /// <summary>
+        /// Broadcasts given message to all communicated processes
+        /// </summary>
+        /// <returns>Sent clock</returns>
+        public long Broadcast<T> (T message, int tag) where T : IMessage
         {
+            Clock++;
+            message.Clock = Clock;
             foreach (int proc in AllButMe)
-                Send(message, proc, tag);
+            {
+                Request sent = _comm.ImmediateSend(message, proc, tag);
+                sent.Test();
+                Logger.LogSent(MyRank, proc, tag, Clock);
+            }
+            return Clock;
         }
 
         public bool ProbeMessage()
@@ -47,10 +64,11 @@ namespace DistributedMonitorMPI.Communication
             return status != null;
         }
 
-        public T ReceiveMessage<T> (int tag)
+        public T ReceiveMessage<T> (int tag) where T : IMessage
         {
             _comm.Receive<T>(Communicator.anySource, tag, out T rcvdMsg, out CompletedStatus rcvdStatus);
-            Logger.LogReceived(MyRank, rcvdStatus.Source, rcvdStatus.Tag);
+            Clock = Math.Max(Clock, rcvdMsg.Clock) + 1;
+            Logger.LogReceived(MyRank, rcvdStatus.Source, rcvdStatus.Tag, Clock);
             return rcvdMsg;
         }
     }
